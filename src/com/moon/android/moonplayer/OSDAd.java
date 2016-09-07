@@ -57,7 +57,9 @@ public class OSDAd extends OSD {
 		ImageLoader.getInstance().displayImage(adurl, mAdImg, mOptions);
 
 	}
-
+    public void SetAdVideo(int sec){
+    	
+    }
 	Handler mhandler = new Handler() {
 
 		@Override

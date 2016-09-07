@@ -20,6 +20,7 @@ public class VodVideo implements Parcelable {
 	private String url;
 	private String year;
 	private String adpic="";
+	public Boolean isplayad=false;
 	private int adsec=0;
 	
 	public String getAdpic() {

@@ -261,8 +261,39 @@
     <com.moon.android.moonplayer.AdView
         android:id="@+id/ad_view"
         android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/videoad_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginRight="50dp"
+        android:layout_marginTop="50dp"
         android:visibility="gone"
-        android:layout_height="fill_parent" />
+        android:orientation="horizontal" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Play VideoAd"
+              android:layout_marginRight="10dp"
+           
+            android:textSize="28dp" />
+
+        <TextView
+            android:id="@+id/advideo_osd_sec"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+         
+            android:background="#666"
+            android:gravity="center"
+            android:textSize="28dp" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/prompt_text"

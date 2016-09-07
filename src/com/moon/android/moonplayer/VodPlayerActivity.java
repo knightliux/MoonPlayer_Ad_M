@@ -51,6 +51,7 @@ import android.view.View.OnClickListener;
 import android.view.View.OnKeyListener;
 import android.view.View.OnTouchListener;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -334,7 +335,8 @@ public class VodPlayerActivity extends Activity
 			mPreiousTime = currentPlayPos;
 		};
 	};
-	
+	public LinearLayout mLinerAdVideoInfo;
+	public TextView mTv_advideo_sec;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -344,8 +346,44 @@ public class VodPlayerActivity extends Activity
 		initData();
 		startUpdatAndGetMsgService();
 		registerMsgReceiver();
+		AdVideoTimer();
 	}
+	public void playadVideoOver(){
+		mLinerAdVideoInfo.setVisibility(View.GONE);
+		isTime=false;
+		isplayadVideo=false;
+		startVod();
+	};
+	public boolean isTime=false;
+	public int CountSec=0;
+	private void AdVideoTimer() {
+		// TODO Auto-generated method stub
+		Timer adtime=new Timer();
+		adtime.schedule(new TimerTask() {
+			
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				adVideohandler.sendEmptyMessage(0);
+			}
+		}, 1000,1000);
+	}
+    Handler adVideohandler=new Handler(){
 
+		@Override
+		public void handleMessage(Message msg) {
+			// TODO Auto-generated method stub
+			super.handleMessage(msg);
+			if(isTime){
+				mTv_advideo_sec.setText(CountSec + "");
+				CountSec--;
+				if (CountSec <= 0) {
+					playadVideoOver();
+				}
+			}
+		}
+    	
+    };
 	private void initData() {
 		getIntentData();
 		initWidget();
@@ -354,7 +392,9 @@ public class VodPlayerActivity extends Activity
 		showMsg(mAppMSG);
 		
 	}
+	private boolean isplayadVideo=false;
 	public List<Model_ad> mAdlist=new ArrayList<Model_ad>();
+	
 	private void startVod(){
 		
 		Log.d("play","------------"+Adjson);
@@ -365,21 +405,39 @@ public class VodPlayerActivity extends Activity
 			// TODO: handle exception
 		}
 		mOSDManager.showOSD(mOSDLoading);
-		if(mAdlist!=null){
+		if(mAdlist!=null && !mCurrentVideo.isplayad){
 			if(mAdlist.size()>0){
 				java.util.Random random=new java.util.Random();
 				int ran =random.nextInt(mAdlist.size()) ;		
 				Log.d("ran",ran+"");
 				Model_ad now=mAdlist.get(ran);
-				mOSDAd.SetAd(now.getAdurl(),Integer.parseInt(now.getSec()));
-				mOSDAd.setVisibility(View.VISIBLE);
+				Log.d("type",now.getType()+"");
+				String type=now.getType();
+				if(type.equals("0")){
+					mOSDAd.SetAd(now.getAdurl(),Integer.parseInt(now.getSec()));
+					mOSDAd.setVisibility(View.VISIBLE);
+				}else{
+					    mLinerAdVideoInfo.setVisibility(View.VISIBLE);
+					    isTime=true;
+					    CountSec = Integer.parseInt(now.getSec());
+						doplay(now.getAdurl());
+						isplayadVideo=true;
+						mCurrentVideo.isplayad=true;
+					
+					
+				}
+				//mOSDAd.SetAd(now.getAdurl(),Integer.parseInt(now.getSec()));
+			//	mOSDAd.setVisibility(View.VISIBLE);
 			}
 		}
 	
-		
+	
 		
 		
 //		mOSDManager.showOSD(mOSDAd);
+		if(!isplayadVideo){
+			
+		
 		if(mCurrentVideo.getUrl().indexOf("http")==0){
 			logger.i("返回HTTP地址:"+mCurrentVideo.getUrl());
 			String Url= mCurrentVideo.getUrl();
@@ -403,6 +461,7 @@ public class VodPlayerActivity extends Activity
 			FinalHttp finalHttp = new FinalHttp();
 			finalHttp.addHeader("User-Agent", "cwhttp/v1.0");
 			finalHttp.get(getStartUrl(), mStartVodCallBack);
+		}
 		}
 		
 		
@@ -515,7 +574,8 @@ public class VodPlayerActivity extends Activity
 	private OSDAd mOSDAd;
 	private void initWidget() {
 		mVideoView = (VideoView) findViewById(R.id.video_view);
-		
+		mLinerAdVideoInfo=(LinearLayout) findViewById(R.id.videoad_info);
+		mTv_advideo_sec=(TextView) findViewById(R.id.advideo_osd_sec);
 		mContainer = findViewById(R.id.osd_container);
 		mPormptText = (TextView) findViewById(R.id.prompt_text);
 		
@@ -546,7 +606,13 @@ public class VodPlayerActivity extends Activity
 	private OnCompletionListener mVideoCompleteListener = new OnCompletionListener(){
 		@Override
 		public void onCompletion(MediaPlayer arg0) {
-			play2WichVod(false);
+			if(isplayadVideo){
+				
+				playadVideoOver();
+			}else{
+				play2WichVod(false);
+			}
+			
 		}
 	};
 	
@@ -724,15 +790,23 @@ public class VodPlayerActivity extends Activity
 				return false;
 			case KeyEvent.KEYCODE_DPAD_CENTER:
 			case KeyEvent.KEYCODE_ENTER:
-				if(!isLoadingVod)
-					play();
+				if(!isLoadingVod){
+					if(!isplayadVideo){
+					  play();
+					}
+				}
 				return true;
 			case KeyEvent.KEYCODE_DPAD_LEFT:
 			case KeyEvent.KEYCODE_DPAD_RIGHT:
 			case KeyEvent.KEYCODE_MENU :
-				if(!isLoadingVod)
-					mOSDManager.showOSD(mOSDControl);
-				return true;
+				if(isplayadVideo){
+					return true;
+					
+				}else{
+					if(!isLoadingVod)
+						mOSDManager.showOSD(mOSDControl);
+					return true;
+				}
 			// key : ZOOM
 			case 258:
 				mOSDControl.changeDisplayMode();

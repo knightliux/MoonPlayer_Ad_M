@@ -15,7 +15,7 @@ import android.util.Log;
 
 public class HistoryDBHelper extends SQLiteOpenHelper {
 	
-	public static final int VERSION = 1;
+	public static final int VERSION = 2;
 	SQLiteDatabase db;
 	
 	public HistoryDBHelper(Context context, String name, CursorFactory factory,
